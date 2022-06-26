@@ -9,7 +9,7 @@ features = data["data"]
 labels = data["target"]
 
 #STEP 1: Split the data so 80% goes into training and 20% goes into testing
-features_train, features_test, labels_train, labels_test = train_test_split(features, labels, test_size = 0.2)
+features_train, features_test, labels_train, labels_test = train_test_split(features, labels, test_size = 0.20)
 
 #initialize and fit the model to the data
 model = DecisionTreeClassifier()
@@ -43,3 +43,33 @@ if len(best_depth["depth"]) > 1:
     print("The best max depths for the model are {}, each with an accuracy of {}".format(best_depth["depth"], best_depth["accuracy"]))
 else:
     print("The best max depth for the model is {}, with an accuracy of {}".format(best_depth["depth"][0], best_depth["accuracy"]))
+
+
+#STEP 4: create a confusion matrix with results from step 3, and answer which class has the most false positives (in output)
+
+#Calculate Confusion Matrix
+model = DecisionTreeClassifier(max_depth=best_depth["depth"][0])
+model.fit(features_train, labels_train)
+predictions = model.predict(features_test)
+cm = confusion_matrix(labels_test, predictions, labels = [0,1,2])
+print(cm)
+
+#calculate False Positives
+most_false_positives = {"label": [],
+                        "fps": -1}
+for i in range(len(cm[0])):
+    fps = sum(cm[:,i]) - cm[i][i]
+    if fps == most_false_positives["fps"]:
+        most_false_positives["label"].append(i)
+        most_false_positives["fps"] = fps
+    if fps > most_false_positives["fps"]:
+        most_false_positives["label"] = [i]
+        most_false_positives["fps"] = fps
+
+if len(most_false_positives["label"]) > 1:
+    print("The labels {}, each have {} False Positives".format(most_false_positives["label"],most_false_positives["fps"]))
+else:
+    print("The label {} has {} False Positives".format(most_false_positives["label"][0], most_false_positives["fps"]))
+
+        
+        
